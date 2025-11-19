@@ -16,9 +16,9 @@ const int servo2Pin = 4;
 const int servo3Pin = 5;
 
 // ---- Servo angles ----
-/*float angle1 = 90;
-float angle2 = 90;
-float angle3 = 90;*/
+float angle1 = 30;
+float angle2 = 30;
+float angle3 = 30;
 
 // ---- Control settings ----
 int activeServo = 1; // 1, 2, or 3
@@ -39,9 +39,15 @@ servo3.attach(servo3Pin);
 pinMode(joyBtn, INPUT_PULLUP);
 
 // Center servos
-/*servo1.write(angle1);
+servo1.write(angle1);
+delay(100);   // wait 20 ms
+
 servo2.write(angle2);
-servo3.write(angle3);*/
+  delay(100);   // wait 20 ms
+
+servo3.write(angle3);
+  delay(100);   // wait 20 ms
+
 
 Serial.println("Starting in SERVO 1 Control Mode");
 }

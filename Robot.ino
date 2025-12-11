@@ -126,7 +126,7 @@ void setup() {
   s2.attach(3);
   s3.attach(4);
   s4.attach(5);
-  s5.attach(6);
+  s5.attach(7);
 }
 
 

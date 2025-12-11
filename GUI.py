@@ -83,13 +83,44 @@ def actionA():
     global ready
     ready = True
 
-    display("A")
-    move_all_slow([90, 150, 112, 115, 90])
-    time.sleep(4)
+    display("A") # GO RIGHT
+    move_all_slow([90, 155, 105, 115, 90]) 
+    time.sleep(1)
 
-    display("A")
-    move_all_slow([90, 150, 112, 55, 90])
-    time.sleep(4)
+    display("A") # GO LEFT
+    move_all_slow([90, 155, 105, 70, 90]) 
+    time.sleep(1)
+
+    display("A") # GO RIGHT
+    move_all_slow([90, 155, 105, 115, 90]) 
+    time.sleep(1)
+
+    display("A") # GO LEFT
+    move_all_slow([90, 155, 105, 70, 90]) 
+    time.sleep(1)
+
+    display("A") # GO RIGHT
+    move_all_slow([90, 155, 105, 115, 90]) 
+    time.sleep(1)
+
+    display("A") # GO LEFT
+    move_all_slow([90, 155, 105, 70, 90]) 
+    time.sleep(1)
+
+    display("A") # GO CENTER 
+    move_all_slow([90, 156, 90, 100, 90]) 
+
+    display("A") # GO CENTER DOWN 
+    move_all_slow([90, 156, 110, 100, 90]) 
+
+    display("A") # GO CENTER 
+    move_all_slow([90, 156, 90, 100, 90]) 
+
+    display("A") # GO CENTER DOWN 
+    move_all_slow([90, 156, 110, 100, 90]) 
+
+    display("A") # GO CENTER 
+    move_all_slow([90, 156, 90, 100, 90]) 
 
     display("SMILE")
     move_all_slow([90, 90, 90, 90, 90])
@@ -99,13 +130,17 @@ def actionB():
     global ready
     ready = True
 
-    display("B")
-    move_all_slow([90, 150, 112, 115, 90])
-    time.sleep(4)
+    display("B") # GO CENTER 
+    move_all_slow([90, 156, 90, 100, 90]) 
+    time.sleep(1)
 
-    display("B")
-    move_all_slow([90, 150, 112, 55, 90])
-    time.sleep(4)
+    display("B") # GO HOME 
+    move_all_slow([90, 90, 90, 90, 90])
+    time.sleep(1)
+
+    display("B") # GO CENTER 
+    move_all_slow([90, 156, 90, 100, 90]) 
+    time.sleep(1)
 
     display("SMILE")
     move_all_slow([90, 90, 90, 90, 90])
@@ -116,12 +151,16 @@ def actionC():
     ready = True
 
     display("C")
-    move_all_slow([90, 150, 112, 115, 90])
-    time.sleep(4)
+    move_all_slow([90, 59, 164, 48, 90])
+    time.sleep(2)
 
     display("C")
-    move_all_slow([90, 150, 112, 55, 90])
-    time.sleep(4)
+    move_all_slow([90, 90, 90, 90, 90])
+    time.sleep(2)
+
+    display("C")
+    move_all_slow([90, 64, 166, 153, 90])
+    time.sleep(2)
 
     display("SMILE")
     move_all_slow([90, 90, 90, 90, 90])

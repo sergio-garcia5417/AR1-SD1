@@ -1,2 +1,3 @@
 // Intall python: winget install 9NQ7512CXL7T -e --accept-package-agreements
 // Install Tkniter: python -m tkinter
+// GUI opens and closes fix: py -m pip install pyserial

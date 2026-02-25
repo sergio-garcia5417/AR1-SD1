@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk
 import serial
 import serial.tools.list_ports
 import time
@@ -8,81 +8,59 @@ BAUD_RATE = 115200
 
 ser = None
 ready = False
-relay_state = False   # False = OFF, True = ON
-
 
 # ---------------------------------------------------------
 # SERIAL HELPERS
 # ---------------------------------------------------------
 def list_com_ports():
-    return [p.device for p in serial.tools.list_ports.comports()]
+    ports = []
+    for p in serial.tools.list_ports.comports():
+        # show something like: "COM5 - Arduino Mega 2560 (CH340)"
+        desc = p.description if p.description else ""
+        ports.append(f"{p.device} - {desc}".strip(" -"))
+    return ports
 
+def selected_port_device():
+    # Extract "COM5" from "COM5 - Arduino..."
+    val = port_var.get().strip()
+    if not val:
+        return ""
+    return val.split(" - ")[0].strip()
 
 def connect_serial():
     global ser, ready
+    ready = False
 
-    port = port_var.get().strip()
-    if not port:
-        messagebox.showwarning("No COM Port", "Select a COM port first.")
+    # Close any existing connection
+    if ser and ser.is_open:
+        try:
+            ser.close()
+        except:
+            pass
+        ser = None
+
+    dev = selected_port_device()
+    if not dev:
+        status_var.set("⚠ Select a COM port first.")
         return
 
-    if ser and ser.is_open:
-        ser.close()
-
     try:
-        ser = serial.Serial(port, BAUD_RATE, timeout=1)
+        ser = serial.Serial(dev, BAUD_RATE, timeout=1)
         time.sleep(2)
-        ready = True
-        status_var.set(f"Connected: {port} @ {BAUD_RATE}")
-        print(f"✔ Connected to {port}")
+        status_var.set(f"✔ Connected to {dev} @ {BAUD_RATE}")
     except Exception as e:
         ser = None
-        ready = False
-        status_var.set("Not connected")
-        messagebox.showerror("Serial Error", f"Could not connect to {port}\n\n{e}")
-
-
-def disconnect_serial():
-    global ser, ready
-    ready = False
-    if ser and ser.is_open:
-        ser.close()
-    ser = None
-    status_var.set("Not connected")
-
+        status_var.set(f"⚠ Serial error: {e}")
 
 def refresh_ports():
     ports = list_com_ports()
     port_combo["values"] = ports
-    if ports:
-        if port_var.get() not in ports:
-            port_var.set(ports[0])
-    else:
-        port_var.set("")
-
+    if ports and not port_var.get():
+        port_var.set(ports[0])
+    status_var.set("Ports refreshed.")
 
 # ---------------------------------------------------------
-# RELAY CONTROL
-# ---------------------------------------------------------
-def toggle_relay():
-    global relay_state
-
-    if not (ser and ser.is_open):
-        messagebox.showwarning("Not connected", "Connect to a COM port first.")
-        return
-
-    if relay_state:
-        ser.write(b"RELAY:OFF\n")
-        relay_btn.config(text="RELAY OFF", bg="red")
-        relay_state = False
-    else:
-        ser.write(b"RELAY:ON\n")
-        relay_btn.config(text="RELAY ON", bg="green")
-        relay_state = True
-
-
-# ---------------------------------------------------------
-# DISPLAY COMMAND
+# SEND DISPLAY COMMAND TO ARDUINO (MAX7219 MATRIX)
 # ---------------------------------------------------------
 def display(text):
     if ser and ser.is_open:
@@ -90,83 +68,260 @@ def display(text):
         ser.write(cmd.encode())
         time.sleep(0.05)
 
-
 # ---------------------------------------------------------
-# SERVO CONTROL
+# SEND ANGLES AND SMOOTH MOVEMENT
+# ORDER MUST MATCH ARDUINO:
+#   a1 -> S1 (PIN 10) GRIPPER
+#   a2 -> S2 (PIN 9)  ROTATION
+#   a3 -> S3 (PIN 8)  LINK 2
+#   a4 -> S4 (PIN 7)  LINK 1
+#   a5 -> S5 (PIN 6)  BASE
 # ---------------------------------------------------------
 def send_angles(a1, a2, a3, a4, a5):
-    if ready and ser and ser.is_open:
+    if not ready:
+        return
+    if ser and ser.is_open:
         msg = f"{int(a1)},{int(a2)},{int(a3)},{int(a4)},{int(a5)}\n"
         ser.write(msg.encode())
 
+def smooth_move(slider, target):
+    current = int(slider.get())
+    target = int(target)
+    if current == target:
+        send_angles(gripper.get(), rotation.get(), link2.get(), link1.get(), base.get())
+        return
 
-def slider_changed(_val):
-    if ser and ser.is_open:
-        send_angles(s1.get(), s2.get(), s3.get(), s4.get(), s5.get())
+    step = 1 if target > current else -1
+    for angle in range(current, target, step):
+        slider.set(angle)
+        send_angles(gripper.get(), rotation.get(), link2.get(), link1.get(), base.get())
+        time.sleep(0.02)
 
+    slider.set(target)
+    send_angles(gripper.get(), rotation.get(), link2.get(), link1.get(), base.get())
+
+def move_all_slow(targets):
+    sliders = [gripper, rotation, link2, link1, base]
+    for slider, target in zip(sliders, targets):
+        smooth_move(slider, target)
+
+# ---------------------------------------------------------
+# BASIC COMMANDS
+# ---------------------------------------------------------
+def slider_changed(_val=None):
+    global ready
+    ready = True
+    send_angles(gripper.get(), rotation.get(), link2.get(), link1.get(), base.get())
 
 def go_home():
-    if not (ser and ser.is_open):
-        messagebox.showwarning("Not connected", "Connect first.")
-        return
+    global ready
+    ready = True
     display("SMILE")
-    send_angles(90, 90, 90, 90, 90)
+    move_all_slow([90, 90, 90, 90, 90])
 
+# ---------------------------------------------------------
+# ACTIONS A, B, C WITH DISPLAY UPDATES (UNCHANGED ANGLE LISTS)
+# BUT NOW THEY MAP TO:
+# [GRIPPER, ROTATION, LINK2, LINK1, BASE]
+# ---------------------------------------------------------
+def actionA():
+    global ready
+    ready = True
+
+    display("A")
+    move_all_slow([90, 150, 120, 90, 120]) #MOVE TO PICK UP
+    time.sleep(.5)
+    
+    move_all_slow([115, 150, 120, 90, 120]) #CLOSE GRIPPER AT PICK UP
+    time.sleep(.5)
+    
+    move_all_slow([115, 150, 120, 90, 75]) #MOVE TO DROP
+    time.sleep(.5)
+    
+    move_all_slow([60, 150, 120, 90, 75]) #OPEN GRIPPER
+    time.sleep(.5)
+    
+    move_all_slow([60, 150, 120, 90, 120]) #MOVE TO PICK UP
+    time.sleep(.5)
+    
+    move_all_slow([115, 150, 120, 90, 120]) #CLOSE GRIPPER AT PICK UP
+    time.sleep(.5)
+    
+    move_all_slow([115, 150, 120, 90, 75]) #MOVE TO DROP
+    time.sleep(.5)
+    
+    move_all_slow([60, 150, 120, 90, 75]) #OPEN GRIPPER
+    time.sleep(.5)
+    move_all_slow([60, 90, 90, 90, 90]) #KEEP GRIPPER OPEN FOR CLEAR
+
+    display("SMILE")
+    move_all_slow([90, 90, 90, 90, 90])
+
+
+def actionB():
+    global ready
+    ready = True
+
+    display("B")
+    move_all_slow([90, 90, 152, 90, 130]) #LEFT
+    time.sleep(.5)
+    
+    move_all_slow([115, 90, 152, 90, 130]) #LEFT GRAB
+    time.sleep(.5)
+    
+    move_all_slow([115, 90, 152, 90, 50]) #RIGHT
+    time.sleep(.5)
+    
+    move_all_slow([60, 90, 152, 90, 50]) #RIGHT DROP
+    time.sleep(.5)
+    
+    move_all_slow([60, 90, 152, 90, 130]) #LEFT
+    time.sleep(.5)
+    
+    move_all_slow([115, 90, 152, 90, 130]) #LEFT GRAB
+    time.sleep(.5)
+    
+    move_all_slow([115, 90, 152, 90, 50]) #RIGHT
+    time.sleep(.5)
+    
+    move_all_slow([60, 90, 152, 90, 50]) #RIGHT DROP
+    time.sleep(.5)
+    
+    move_all_slow([60, 90, 152, 90, 130]) #LEFT
+    time.sleep(.5)
+    
+    move_all_slow([115, 90, 152, 90, 130]) #LEFT GRAB
+    time.sleep(.5)
+    
+    move_all_slow([115, 90, 152, 90, 50]) #RIGHT
+    time.sleep(.5)
+    
+    move_all_slow([60, 90, 152, 90, 50]) #RIGHT DROP
+    time.sleep(.5)
+    
+    move_all_slow([60, 90, 90, 90, 90])
+
+    display("SMILE")
+    move_all_slow([90, 90, 90, 90, 90])
+
+def actionC():
+    global ready
+    ready = True
+
+    display("C")
+    move_all_slow([90, 134, 151, 90, 125]) #START
+
+    move_all_slow([115, 134, 151, 90, 125])
+
+    move_all_slow([115, 134, 115, 90, 77])
+
+    move_all_slow([115, 134, 115, 90, 77])
+
+    move_all_slow([90, 134, 115, 90, 77])
+    
+    move_all_slow([90, 134, 151, 90, 125]) #START
+
+    move_all_slow([115, 134, 151, 90, 125])
+
+    move_all_slow([115, 134, 115, 90, 77])
+
+    move_all_slow([115, 134, 115, 90, 77])
+
+    move_all_slow([90, 134, 115, 90, 77])
+    
+    move_all_slow([90, 134, 151, 90, 125]) #START
+
+    move_all_slow([115, 134, 151, 90, 125])
+
+    move_all_slow([115, 134, 115, 90, 77])
+
+    move_all_slow([115, 134, 115, 90, 77])
+
+    move_all_slow([90, 134, 115, 90, 77])
+    
+    move_all_slow([90, 134, 151, 90, 125]) #START
+
+    move_all_slow([115, 134, 151, 90, 125])
+
+    move_all_slow([115, 134, 115, 90, 77])
+
+    move_all_slow([115, 134, 115, 90, 77])
+
+    move_all_slow([90, 134, 115, 90, 77])
+    
+    move_all_slow([90, 120, 140, 90, 90])
+    move_all_slow([90, 120, 155, 90, 90])
+    move_all_slow([90, 120, 140, 90, 90])
+    move_all_slow([90, 120, 155, 90, 90])
+    move_all_slow([90, 120, 140, 90, 90])
+    move_all_slow([90, 120, 155, 90, 90])
+    time.sleep(.5)
+
+
+    display("SMILE")
+    move_all_slow([90, 90, 90, 90, 90])
 
 # ---------------------------------------------------------
 # GUI SETUP
 # ---------------------------------------------------------
 root = tk.Tk()
-root.title("Servo + Relay Controller")
-root.geometry("460x760")
-
-# Serial bar
-top = tk.Frame(root)
-top.pack(fill="x", padx=12, pady=10)
-
-tk.Label(top, text="COM Port:", font=("Arial", 10, "bold")).pack(side="left")
-
-port_var = tk.StringVar(value="")
-port_combo = ttk.Combobox(top, textvariable=port_var, width=12, state="readonly")
-port_combo.pack(side="left", padx=6)
-
-tk.Button(top, text="Refresh", command=refresh_ports).pack(side="left", padx=6)
-tk.Button(top, text="Connect", command=connect_serial).pack(side="left", padx=6)
-tk.Button(top, text="Disconnect", command=disconnect_serial).pack(side="left", padx=6)
-
-status_var = tk.StringVar(value="Not connected")
-tk.Label(root, textvariable=status_var).pack(fill="x", padx=12)
-
-refresh_ports()
+root.title("Servo Controller")
+root.geometry("460x720")
 
 DEFAULT_ANGLE = 90
 
-s1 = tk.Scale(root, from_=0, to=180, orient="horizontal", label="GRIPPER", command=slider_changed)
-s2 = tk.Scale(root, from_=0, to=180, orient="horizontal", label="ROTATION", command=slider_changed)
-s3 = tk.Scale(root, from_=0, to=180, orient="horizontal", label="LINK 2", command=slider_changed)
-s4 = tk.Scale(root, from_=0, to=180, orient="horizontal", label="LINK 1", command=slider_changed)
-s5 = tk.Scale(root, from_=0, to=180, orient="horizontal", label="BASE", command=slider_changed)
+# ---- Serial frame (COM dropdown + buttons)
+serial_frame = tk.LabelFrame(root, text="Serial", padx=10, pady=10)
+serial_frame.pack(fill="x", padx=15, pady=10)
 
-for s in (s1, s2, s3, s4, s5):
-    s.set(DEFAULT_ANGLE)
-    s.pack(fill="x", padx=20, pady=4)
+port_var = tk.StringVar(value="")
+port_combo = ttk.Combobox(serial_frame, textvariable=port_var, state="readonly", width=45)
+port_combo.grid(row=0, column=0, columnspan=3, sticky="we", padx=5, pady=5)
 
-tk.Button(root, text="HOME", font=("Arial", 14, "bold"), command=go_home, bg="#d0d0ff").pack(pady=10)
+btn_refresh = tk.Button(serial_frame, text="Refresh Ports", command=refresh_ports)
+btn_refresh.grid(row=1, column=0, sticky="we", padx=5, pady=5)
 
-# ---------------------------------------------------------
-# 🔴 RELAY BUTTON (BIG)
-# ---------------------------------------------------------
-relay_btn = tk.Button(
-    root,
-    text="RELAY OFF",
-    font=("Arial", 18, "bold"),
-    bg="red",
-    fg="white",
-    height=2,
-    command=toggle_relay
-)
-relay_btn.pack(pady=20, fill="x", padx=40)
+btn_connect = tk.Button(serial_frame, text="Connect", command=connect_serial)
+btn_connect.grid(row=1, column=1, sticky="we", padx=5, pady=5)
 
+status_var = tk.StringVar(value="Select a COM port, then Connect.")
+status_label = tk.Label(serial_frame, textvariable=status_var, anchor="w")
+status_label.grid(row=2, column=0, columnspan=3, sticky="we", padx=5, pady=5)
+
+serial_frame.columnconfigure(0, weight=1)
+serial_frame.columnconfigure(1, weight=1)
+serial_frame.columnconfigure(2, weight=1)
+
+# Populate ports on startup
+refresh_ports()
+
+# ---- Sliders frame
+sliders_frame = tk.LabelFrame(root, text="Servos (Pins: 10, 9, 8, 7, 6)", padx=10, pady=10)
+sliders_frame.pack(fill="x", padx=15, pady=10)
+
+# Labels requested:
+# 10 GRIPPER, 9 ROTATION, 8 LINK 2, 7 LINK 1, 6 BASE
+gripper  = tk.Scale(sliders_frame, from_=60, to=125, orient="horizontal", label="GRIPPER (S1 Pin 10)", command=slider_changed);  gripper.set(DEFAULT_ANGLE)
+rotation = tk.Scale(sliders_frame, from_=0, to=180, orient="horizontal", label="LINK 1 (S2 Pin 9)", command=slider_changed); rotation.set(DEFAULT_ANGLE)
+link2    = tk.Scale(sliders_frame, from_=0, to=180, orient="horizontal", label="LINK 2 (S3 Pin 8)", command=slider_changed);    link2.set(DEFAULT_ANGLE)
+link1    = tk.Scale(sliders_frame, from_=0, to=180, orient="horizontal", label="EMPTY (S4 Pin 7)", command=slider_changed);    link1.set(DEFAULT_ANGLE)
+base     = tk.Scale(sliders_frame, from_=0, to=180, orient="horizontal", label="BASE (S5 Pin 6)", command=slider_changed);       base.set(DEFAULT_ANGLE)
+
+for w in (gripper, rotation, link2, link1, base):
+    w.pack(fill="x", padx=10, pady=4)
+
+# ---- Buttons
+btn_home = tk.Button(root, text="HOME", font=("Arial", 14, "bold"), command=go_home, bg="#d0d0ff")
+btn_home.pack(pady=8)
+
+btn_actionA = tk.Button(root, text="ACTION A", font=("Arial", 14, "bold"), command=actionA, bg="#ffd0d0")
+btn_actionA.pack(pady=8)
+
+btn_actionB = tk.Button(root, text="ACTION B", font=("Arial", 14, "bold"), command=actionB, bg="#d0ffd0")
+btn_actionB.pack(pady=8)
+
+btn_actionC = tk.Button(root, text="ACTION C", font=("Arial", 14, "bold"), command=actionC, bg="#d0d0ff")
+btn_actionC.pack(pady=8)
 
 warning_label = tk.Label(
     root,
@@ -175,12 +330,6 @@ warning_label = tk.Label(
     fg="yellow",
     bg="black"
 )
-warning_label.pack(pady=10)
+warning_label.pack(pady=12, fill="x", padx=15)
 
-
-def on_close():
-    disconnect_serial()
-    root.destroy()
-
-root.protocol("WM_DELETE_WINDOW", on_close)
 root.mainloop()

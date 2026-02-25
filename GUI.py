@@ -1,27 +1,84 @@
-import tkinter as tk 
+import tkinter as tk
+from tkinter import ttk, messagebox
 import serial
+import serial.tools.list_ports
 import time
 
-SERIAL_PORT = "COM5"
 BAUD_RATE = 115200
 
 ser = None
 ready = False
 
-try:
-    ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
-    time.sleep(2)
-    print(f"✔ Connected to {SERIAL_PORT}")
-except Exception as e:
-    print("⚠ Serial error:", e)
+
+# ---------------------------------------------------------
+# SERIAL HELPERS
+# ---------------------------------------------------------
+def list_com_ports():
+    ports = []
+    for p in serial.tools.list_ports.comports():
+        ports.append(p.device)  # e.g., "COM5"
+    return ports
+
+
+def connect_serial():
+    """Connect using the selected COM port."""
+    global ser, ready
+
+    port = port_var.get().strip()
+    if not port:
+        messagebox.showwarning("No COM Port", "Select a COM port first.")
+        return
+
+    # Close previous connection if any
+    if ser and ser.is_open:
+        try:
+            ser.close()
+        except Exception:
+            pass
+
+    try:
+        ser = serial.Serial(port, BAUD_RATE, timeout=1)
+        time.sleep(2)  # allow Arduino reset on connect
+        ready = True
+        status_var.set(f"Connected: {port} @ {BAUD_RATE}")
+        print(f"✔ Connected to {port}")
+    except Exception as e:
+        ser = None
+        ready = False
+        status_var.set("Not connected")
+        messagebox.showerror("Serial Error", f"Could not connect to {port}\n\n{e}")
+        print("⚠ Serial error:", e)
+
+
+def disconnect_serial():
+    global ser, ready
+    ready = False
+    if ser and ser.is_open:
+        try:
+            ser.close()
+        except Exception:
+            pass
     ser = None
+    status_var.set("Not connected")
+
+
+def refresh_ports():
+    ports = list_com_ports()
+    port_combo["values"] = ports
+    if ports:
+        # Keep current selection if still valid; otherwise select first
+        current = port_var.get()
+        if current not in ports:
+            port_var.set(ports[0])
+    else:
+        port_var.set("")
 
 
 # ---------------------------------------------------------
 # SEND DISPLAY COMMAND TO ARDUINO (MAX7219 MATRIX)
 # ---------------------------------------------------------
 def display(text):
-    if ser:
+    if ser and ser.is_open:
         cmd = f"DISPLAY:{text}\n"
         ser.write(cmd.encode())
         time.sleep(0.05)
@@ -30,11 +87,10 @@ def display(text):
 # ---------------------------------------------------------
 # SEND ANGLES AND SMOOTH MOVEMENT
 # ---------------------------------------------------------
-
 def send_angles(a1, a2, a3, a4, a5):
     if not ready:
         return
-    if ser:
+    if ser and ser.is_open:
         msg = f"{int(a1)},{int(a2)},{int(a3)},{int(a4)},{int(a5)}\n"
         ser.write(msg.encode())
 
@@ -61,15 +117,19 @@ def move_all_slow(targets):
 # ---------------------------------------------------------
 # BASIC COMMANDS
 # ---------------------------------------------------------
-
-def slider_changed(val):
+def slider_changed(_val):
     global ready
-    ready = True
-    send_angles(s1.get(), s2.get(), s3.get(), s4.get(), s5.get())
+    # Do not force ready=True if not connected; only send when connected
+    if ser and ser.is_open:
+        ready = True
+        send_angles(s1.get(), s2.get(), s3.get(), s4.get(), s5.get())
 
 
 def go_home():
     global ready
+    if not (ser and ser.is_open):
+        messagebox.showwarning("Not connected", "Connect to a COM port first.")
+        return
     ready = True
     display("SMILE")
     move_all_slow([90, 90, 90, 90, 90])
@@ -78,49 +138,51 @@ def go_home():
 # ---------------------------------------------------------
 # ACTIONS A, B, C WITH DISPLAY UPDATES
 # ---------------------------------------------------------
-
 def actionA():
     global ready
+    if not (ser and ser.is_open):
+        messagebox.showwarning("Not connected", "Connect to a COM port first.")
+        return
     ready = True
 
-    display("A") # GO RIGHT
-    move_all_slow([90, 155, 105, 115, 90]) 
+    display("A")  # GO RIGHT
+    move_all_slow([90, 155, 105, 115, 90])
     time.sleep(1)
 
-    display("A") # GO LEFT
-    move_all_slow([90, 155, 105, 70, 90]) 
+    display("A")  # GO LEFT
+    move_all_slow([90, 155, 105, 70, 90])
     time.sleep(1)
 
-    display("A") # GO RIGHT
-    move_all_slow([90, 155, 105, 115, 90]) 
+    display("A")  # GO RIGHT
+    move_all_slow([90, 155, 105, 115, 90])
     time.sleep(1)
 
-    display("A") # GO LEFT
-    move_all_slow([90, 155, 105, 70, 90]) 
+    display("A")  # GO LEFT
+    move_all_slow([90, 155, 105, 70, 90])
     time.sleep(1)
 
-    display("A") # GO RIGHT
-    move_all_slow([90, 155, 105, 115, 90]) 
+    display("A")  # GO RIGHT
+    move_all_slow([90, 155, 105, 115, 90])
     time.sleep(1)
 
-    display("A") # GO LEFT
-    move_all_slow([90, 155, 105, 70, 90]) 
+    display("A")  # GO LEFT
+    move_all_slow([90, 155, 105, 70, 90])
     time.sleep(1)
 
-    display("A") # GO CENTER 
-    move_all_slow([90, 156, 90, 100, 90]) 
+    display("A")  # GO CENTER
+    move_all_slow([90, 156, 90, 100, 90])
 
-    display("A") # GO CENTER DOWN 
-    move_all_slow([90, 156, 110, 100, 90]) 
+    display("A")  # GO CENTER DOWN
+    move_all_slow([90, 156, 110, 100, 90])
 
-    display("A") # GO CENTER 
-    move_all_slow([90, 156, 90, 100, 90]) 
+    display("A")  # GO CENTER
+    move_all_slow([90, 156, 90, 100, 90])
 
-    display("A") # GO CENTER DOWN 
-    move_all_slow([90, 156, 110, 100, 90]) 
+    display("A")  # GO CENTER DOWN
+    move_all_slow([90, 156, 110, 100, 90])
 
-    display("A") # GO CENTER 
-    move_all_slow([90, 156, 90, 100, 90]) 
+    display("A")  # GO CENTER
+    move_all_slow([90, 156, 90, 100, 90])
 
     display("SMILE")
     move_all_slow([90, 90, 90, 90, 90])
@@ -128,18 +190,21 @@ def actionA():
 
 def actionB():
     global ready
+    if not (ser and ser.is_open):
+        messagebox.showwarning("Not connected", "Connect to a COM port first.")
+        return
     ready = True
 
-    display("B") # GO CENTER 
-    move_all_slow([90, 156, 90, 100, 90]) 
+    display("B")  # GO CENTER
+    move_all_slow([90, 156, 90, 100, 90])
     time.sleep(1)
 
-    display("B") # GO HOME 
+    display("B")  # GO HOME
     move_all_slow([90, 90, 90, 90, 90])
     time.sleep(1)
 
-    display("B") # GO CENTER 
-    move_all_slow([90, 156, 90, 100, 90]) 
+    display("B")  # GO CENTER
+    move_all_slow([90, 156, 90, 100, 90])
     time.sleep(1)
 
     display("SMILE")
@@ -148,6 +213,9 @@ def actionB():
 
 def actionC():
     global ready
+    if not (ser and ser.is_open):
+        messagebox.showwarning("Not connected", "Connect to a COM port first.")
+        return
     ready = True
 
     display("C")
@@ -169,24 +237,47 @@ def actionC():
 # ---------------------------------------------------------
 # GUI SETUP
 # ---------------------------------------------------------
-
 root = tk.Tk()
 root.title("Servo Controller")
-root.geometry("420x620")
+root.geometry("460x700")
+
+# --- Serial connection bar ---
+top = tk.Frame(root)
+top.pack(fill="x", padx=12, pady=10)
+
+tk.Label(top, text="COM Port:", font=("Arial", 10, "bold")).pack(side="left")
+
+port_var = tk.StringVar(value="")
+port_combo = ttk.Combobox(top, textvariable=port_var, width=12, state="readonly")
+port_combo.pack(side="left", padx=6)
+
+btn_refresh = tk.Button(top, text="Refresh", command=refresh_ports)
+btn_refresh.pack(side="left", padx=6)
+
+btn_connect = tk.Button(top, text="Connect", command=connect_serial)
+btn_connect.pack(side="left", padx=6)
+
+btn_disconnect = tk.Button(top, text="Disconnect", command=disconnect_serial)
+btn_disconnect.pack(side="left", padx=6)
+
+status_var = tk.StringVar(value="Not connected")
+status_lbl = tk.Label(root, textvariable=status_var, anchor="w")
+status_lbl.pack(fill="x", padx=12)
+
+# Populate COM ports on launch
+refresh_ports()
 
 DEFAULT_ANGLE = 90
 
-s1 = tk.Scale(root, from_=0, to=180, orient="horizontal", label="PITCH", command=slider_changed); s1.set(DEFAULT_ANGLE)
-s2 = tk.Scale(root, from_=0, to=180, orient="horizontal", label="LINK 1", command=slider_changed); s2.set(DEFAULT_ANGLE)
-s3 = tk.Scale(root, from_=0, to=180, orient="horizontal", label="LINK 2", command=slider_changed); s3.set(DEFAULT_ANGLE)
-s4 = tk.Scale(root, from_=0, to=180, orient="horizontal", label="BASE", command=slider_changed); s4.set(DEFAULT_ANGLE)
-s5 = tk.Scale(root, from_=0, to=180, orient="horizontal", label="GRIPPER", command=slider_changed); s5.set(DEFAULT_ANGLE)
+s1 = tk.Scale(root, from_=0, to=180, orient="horizontal", label="GRIPPER", command=slider_changed)
+s2 = tk.Scale(root, from_=0, to=180, orient="horizontal", label="ROTATION", command=slider_changed)
+s3 = tk.Scale(root, from_=0, to=180, orient="horizontal", label="LINK 2", command=slider_changed)
+s4 = tk.Scale(root, from_=0, to=180, orient="horizontal", label="LINK 1", command=slider_changed)
+s5 = tk.Scale(root, from_=0, to=180, orient="horizontal", label="BASE", command=slider_changed)
 
-s1.pack(fill="x", padx=20)
-s2.pack(fill="x", padx=20)
-s3.pack(fill="x", padx=20)
-s4.pack(fill="x", padx=20)
-s5.pack(fill="x", padx=20)
+for s in (s1, s2, s3, s4, s5):
+    s.set(DEFAULT_ANGLE)
+    s.pack(fill="x", padx=20, pady=4)
 
 btn_home = tk.Button(root, text="HOME", font=("Arial", 14, "bold"), command=go_home, bg="#d0d0ff")
 btn_home.pack(pady=10)
@@ -209,4 +300,11 @@ warning_label = tk.Label(
 )
 warning_label.pack(pady=10)
 
+
+def on_close():
+    disconnect_serial()
+    root.destroy()
+
+
+root.protocol("WM_DELETE_WINDOW", on_close)
 root.mainloop()

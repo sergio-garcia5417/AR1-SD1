@@ -1258,6 +1258,127 @@ def slider_changed(_val=None):
 def servo_test_changed(_val=None):
     send_test_servo(servo_test_slider.get())
 
+# ---------------------------------------------------------
+# REUSABLE SEQUENCES
+# ---------------------------------------------------------
+# These lists let the manual Tool Selection buttons and the automatic
+# program actions reuse the same pickup/return instructions without
+# copy-pasting the coordinates into every action.
+
+GRIPPER_PICKUP_SEQ = [
+    {"move": [90, 90, 90, 90, 90], "pause_ms": 600},      # start home
+    {"move": [152, 90, 90, 90, 90], "pause_ms": 600},     # rotate base
+    {"move": [152, 56, 120, 120, 85], "pause_ms": 2000},  # straighten
+    {"move": [152, 102, 144, 152, 80], "pause_ms": 2000}, # get to latch position
+    {"relay": "MAGNET", "state": "ON"},                  # turn on magnet
+    {"move": [152, 102, 144, 152, 80], "pause_ms": 2000}, # confirm latch position
+    {"move": [152, 56, 144, 152, 80], "pause_ms": 2000},  # pull away / straighten
+    {"move": [90, 90, 90, 90, 90], "pause_ms": 600},      # home
+]
+
+GRIPPER_RETURN_SEQ = [
+    {"move": [90, 90, 90, 90, 90]},
+    {"move": [90, 90, 125, 149, 80], "pause_ms": 3000},
+    {"move": [152, 90, 125, 149, 80], "pause_ms": 3000},
+    {"move": [152, 70, 125, 149, 80], "pause_ms": 3000},
+    {"move": [160, 70, 137, 149, 80], "pause_ms": 3000},
+    {"move": [152, 90, 137, 149, 80], "pause_ms": 5000},
+    {"move": [152, 101, 137, 149, 80], "pause_ms": 5000},
+    {"move": [152, 101, 145, 149, 80], "pause_ms": 2000},
+    {"relay": "MAGNET", "state": "OFF", "pause_ms": 3000},
+    {"move": [152, 95, 145, 149, 80], "pause_ms": 2000},
+    {"move": [90, 90, 90, 90, 90]},
+]
+
+PUMP_PICKUP_SEQ = [
+    {"move": [90, 90, 90, 90, 90], "pause_ms": 300},
+    {"move": [90, 65, 132, 134, 90], "pause_ms": 600},
+    {"move": [90, 65, 150, 134, 90], "pause_ms": 600},
+    {"move": [90, 114, 150, 134, 90], "pause_ms": 1000},
+    {"move": [90, 117, 150, 134, 90], "pause_ms": 1000},
+    {"relay": "MAGNET", "state": "ON", "pause_ms": 100},
+    {"move": [90, 90, 90, 90, 90], "pause_ms": 300},
+]
+
+PUMP_RETURN_SEQ = [
+    {"move": [90, 90, 90, 90, 90]},
+    {"move": [90, 87, 90, 90, 90], "pause_ms": 2000},
+    {"move": [90, 90, 90, 90, 90], "pause_ms": 6000},
+    {"relay": "MAGNET", "state": "OFF"},
+]
+
+PNEUMATIC_PICKUP_SEQ = [
+    {"move": [90, 90, 90, 90, 90], "pause_ms": 3000},
+    {"move": [20, 90, 90, 90, 90], "pause_ms": 5000},
+    {"move": [20, 103, 138, 150, 87], "pause_ms": 10000},
+    {"move": [20, 103, 138, 150, 87], "pause_ms": 1000},
+    {"move": [20, 111, 138, 150, 87], "pause_ms": 5000},
+    {"relay": "MAGNET", "state": "ON", "pause_ms": 2000},
+    {"move": [20, 95, 138, 150, 87], "pause_ms": 5000},
+    {"move": [90, 90, 90, 90, 90]},
+]
+
+PNEUMATIC_RETURN_SEQ = [
+    {"move": [90, 90, 90, 90, 90]},
+    {"move": [90, 87, 90, 90, 90], "pause_ms": 2000},
+    {"move": [90, 90, 90, 90, 90], "pause_ms": 6000},
+    {"relay": "MAGNET", "state": "OFF"},
+]
+
+ACTION_A_TASK_SEQ = [
+    {"move": [90, 90, 90, 90, 90], "pause_ms": 1000},
+    {"test_servo": 45, "pause_ms": 5000},
+    {"move": [106, 95, 155, 50, 90], "pause_ms": 2000},
+    {"move": [106, 119, 155, 50, 90], "pause_ms": 2000},
+    {"test_servo": 64, "pause_ms": 5000},
+    {"move": [106, 110, 150, 50, 90]},
+    {"move": [106, 90, 100, 50, 90]},
+    {"move": [74, 90, 100, 50, 90], "pause_ms": 2000},
+    {"move": [74, 114, 148, 50, 90], "pause_ms": 3000},
+    {"move": [74, 120, 155, 50, 90], "pause_ms": 4000},
+    {"test_servo": 45, "pause_ms": 5000},
+    {"move": [74, 95, 90, 90, 90], "pause_ms": 2000},
+    {"test_servo": 90, "pause_ms": 5000},
+    {"move": [90, 90, 90, 90, 90], "pause_ms": 6000},
+]
+
+ACTION_B_TASK_SEQ = [
+    # B STEPS
+]
+
+ACTION_C_TASK_SEQ = [
+    #C STEPS
+]
+
+TOOL_RETURN_SEQUENCES = {
+    "gripper": GRIPPER_RETURN_SEQ,
+    "pump": PUMP_RETURN_SEQ,
+    "pneumatic": PNEUMATIC_RETURN_SEQ,
+}
+
+# ------------------------------------------------------------------------------------------------------
+# COMMANDS
+# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+def slider_changed(_val=None):
+    global ready
+    ready = True
+
+    if is_animating:
+        return
+
+    base  = base_slider.get()
+    link1 = link1_slider.get()
+    link2 = link2_slider.get()
+    link3 = link3_slider.get()
+    tool  = tool_slider.get()
+
+    send_angles(base, link1, link2, link3, tool)
+    arm.set_angles_from_servos(base, link1, link2, link3, tool)
+    update_info_boxes()
+
+def servo_test_changed(_val=None):
+    send_test_servo(servo_test_slider.get())
+
 def go_home():
     if tool_attached:
         status_var.set("Return the active tool before using Home.")
@@ -1272,167 +1393,51 @@ def actionA():
         status_var.set("Return the active tool before running Action A.")
         return
 
-    start_action([
-
-        #[106, 119, 155, 50, 90]
-        #[base, link1, link2, link3, wrist]
-        #TESTSERVO:90
-        #Gripper Tool Selection Sequence-------------------------------------------------------------------------
-        {"move": [90, 90, 90, 90, 90], "pause_ms": 600}, #start home
-        {"move": [152, 90, 90, 90, 90], "pause_ms": 600}, #rotate base
-        {"move": [152, 56, 120, 120, 85]}, #STRAIGHTEN
-        {"move": [152, 103, 144, 152, 80], "pause_ms": 2000}, #get to latch position
-        {"relay": "MAGNET", "state": "ON"}, #turn on magnet
-        {"move": [152, 103, 144, 152, 80], "pause_ms": 2000}, #get to latch position
-        {"move": [152, 56, 144, 152, 80], "pause_ms": 2000}, #STRAIGHTEN
-        {"move": [90, 90, 90, 90, 90], "pause_ms": 600}, #home
-        #Sequence end--------------------------------------------------------------------------------------------
-
-    # Pick up gripper above
-    # Start at home
-    {"move": [90, 90, 90, 90, 90], "pause_ms": 1000},
-    # Open gripper
-    {"test_servo": 45, "pause_ms": 5000},
-    # Acquire target
-    {"move": [106, 95, 155, 50, 90], "pause_ms": 2000},
-    {"move": [106, 119, 155, 50, 90], "pause_ms": 2000},
-    # Close gripper
-    {"test_servo": 64, "pause_ms": 5000},
-    # Pull up target
-    {"move": [106,110,150,50,90]}, 
-    {"move": [106,90,100,50,90]}, 
-    # Move base left to drop-off
-    {"move": [74, 90, 100, 50, 90], "pause_ms": 2000},
-    {"move": [74, 114, 148, 50, 90], "pause_ms": 3000},
-    # Lower and wait for target to stabilize
-    {"move": [74, 120, 155, 50, 90], "pause_ms": 4000},
-    # Open gripper / drop target
-    {"test_servo": 45, "pause_ms": 5000},
-    # Move arm up
-    {"move": [74, 95, 90, 90, 90], "pause_ms": 2000},
-    # Return home
-    {"test_servo": 90, "pause_ms": 5000},
-    {"move": [90, 90, 90, 90, 90], "pause_ms": 6000},
-    
-    #--------------------------------------RETURN GRIPPER
-        {"move": [90, 90, 125, 149, 80], "pause_ms": 3000}, #LOWER L3 AND L2 & TURN WRIST
-        {"move": [152, 90, 125, 149, 80], "pause_ms": 3000}, #TURN BASE ONLY
-        {"move": [152, 70, 125, 149, 80], "pause_ms": 3000}, #PULL BACK L1 FOR CLEARENCE
-        {"move": [160, 70, 137, 149, 80], "pause_ms": 3000}, #PUSH L2 TOWARDS DOCK
-        {"move": [152, 90, 137, 149, 80], "pause_ms": 5000}, #HOVER L1 OVER DOCK
-        {"move": [152, 101, 137, 149, 80], "pause_ms": 5000}, #HOVER CONFIRM BACKLASH REMOVE    
-        {"move": [152, 101, 145, 149, 80], "pause_ms": 2000}, #FINAL DOCK, ONLY L2 MOVES    
-        {"relay": "MAGNET", "state": "OFF", "pause_ms": 3000}, #turn OFF magnet
-        {"move": [152, 95, 145, 149, 80], "pause_ms": 2000},  
-        {"move": [90, 90, 90, 90, 90]}, 
-
-    #----------------------------------------------RETURN GRIPPER END
-    ])
+    full_seq = GRIPPER_PICKUP_SEQ + ACTION_A_TASK_SEQ + GRIPPER_RETURN_SEQ
+    start_action(full_seq, on_done=lambda: status_var.set("Action A complete. Gripper returned."))
 
 def actionB():
     if tool_attached:
         status_var.set("Return the active tool before running Action B.")
         return
 
-    seq = [
-    {"test_servo": 90, "pause_ms": 2000},
-    {"test_servo": 45, "pause_ms": 6000},
-    {"test_servo": 90, "pause_ms": 6000},
-    {"test_servo": 45, "pause_ms": 6000},
-     
-    ]
-    start_action(seq)
+    full_seq = PUMP_PICKUP_SEQ + ACTION_B_TASK_SEQ + PUMP_RETURN_SEQ
+    start_action(full_seq)
+
 
 def actionC():
     if tool_attached:
         status_var.set("Return the active tool before running Action C.")
         return
 
-    seq = [
-        {"display": "C", "move": [90, 90, 90, 90, 90], "pause_ms": 0},
-        {"display": "SMILE", "move": [90, 90, 90, 90, 90], "pause_ms": 0},
-    ]
-    start_action(seq)
+    full_seq = PNEUMATIC_PICKUP_SEQ + ACTION_C_TASK_SEQ + PNEUMATIC_RETURN_SEQ
+    start_action(full_seq)
 
 # [base, link1, link2, link3, wrist]
 def select_gripper():
     if is_animating or tool_attached:
         return
 
-    start_action([
-        {"move": [90, 90, 90, 90, 90], "pause_ms": 600}, #start home
-        {"move": [152, 90, 90, 90, 90], "pause_ms": 600}, #rotate base
-        {"move": [152, 56, 120, 120, 85], "pause_ms": 2000}, #STRAIGHTEN
-        {"move": [152, 102, 144, 152, 80], "pause_ms": 2000}, #get to latch position
-        {"relay": "MAGNET", "state": "ON"}, #turn on magnet
-        {"move": [152, 102, 144, 152, 80], "pause_ms": 2000}, #get to latch position
-        {"move": [152, 56, 144, 152, 80], "pause_ms": 2000}, #STRAIGHTEN
-        {"move": [90, 90, 90, 90, 90], "pause_ms": 600}, #home
-    ], on_done=lambda: mark_tool_attached("gripper"))
+    start_action(GRIPPER_PICKUP_SEQ, on_done=lambda: mark_tool_attached("gripper"))
 
 def select_pump():
     if is_animating or tool_attached:
         return
 
-    start_action([
-        {"move": [90, 90, 90, 90, 90], "pause_ms": 300},
-        {"move": [90, 65, 132, 134, 90], "pause_ms": 600},
-        {"move": [90, 65, 150, 134, 90], "pause_ms": 600},
-        {"move": [90, 114, 150, 134, 90], "pause_ms": 1000},
-        {"move": [90, 117, 150, 134, 90], "pause_ms": 1000},
-        {"relay": "MAGNET", "state": "ON", "pause_ms": 100},
-        {"move": [90, 90, 90, 90, 90], "pause_ms": 300},
-    ], on_done=lambda: mark_tool_attached("pump"))
-########################################################################################PNEUMATIC PICKUP SEQUENCE
+    start_action(PUMP_PICKUP_SEQ, on_done=lambda: mark_tool_attached("pump"))
+
 def select_pneumatic():
     if is_animating or tool_attached:
         return
 
-    start_action([
-        {"move": [90, 90, 90, 90, 90], "pause_ms": 3000},
-        {"move": [20, 90, 90, 90, 90], "pause_ms": 5000},
-        {"move": [20, 103, 138, 150, 87], "pause_ms": 10000}, #HOVER
-        {"move": [20, 103, 138, 150, 87], "pause_ms": 1000}, #HOVER CONFIRM
-        {"move": [20, 111, 138, 150, 87], "pause_ms": 5000}, #FORCE LATCH
-        {"relay": "MAGNET", "state": "ON", "pause_ms": 2000},
-        {"move": [20, 95, 138, 150, 87], "pause_ms": 5000}, #PULL L1
-        {"move": [90, 90, 90, 90, 90]}, #HOME
-
-    ], on_done=lambda: mark_tool_attached("pneumatic"))
+    start_action(PNEUMATIC_PICKUP_SEQ, on_done=lambda: mark_tool_attached("pneumatic"))
 
 def return_active_tool():
     if is_animating or not tool_attached or active_tool is None:
         return
 
-    if active_tool == "gripper": #-----------------------RETURN GRIPPER SEQUENCE-------------------------------------
-        seq = [
-        {"move": [90, 90, 90, 90, 90]},
-        {"move": [90, 90, 125, 149, 80], "pause_ms": 3000}, #LOWER L3 AND L2 & TURN WRIST
-        {"move": [152, 90, 125, 149, 80], "pause_ms": 3000}, #TURN BASE ONLY
-        {"move": [152, 70, 125, 149, 80], "pause_ms": 3000}, #PULL BACK L1 FOR CLEARENCE
-        {"move": [160, 70, 137, 149, 80], "pause_ms": 3000}, #PUSH L2 TOWARDS DOCK
-        {"move": [152, 90, 137, 149, 80], "pause_ms": 5000}, #HOVER L1 OVER DOCK
-        {"move": [152, 101, 137, 149, 80], "pause_ms": 5000}, #HOVER CONFIRM BACKLASH REMOVE    
-        {"move": [152, 101, 145, 149, 80], "pause_ms": 2000}, #FINAL DOCK, ONLY L2 MOVES    
-        {"relay": "MAGNET", "state": "OFF", "pause_ms": 3000}, #turn OFF magnet
-        {"move": [152, 95, 145, 149, 80], "pause_ms": 2000},  
-        {"move": [90, 90, 90, 90, 90]}, 
-        ]
-    elif active_tool == "pump":
-        seq = [
-        {"move": [90, 90, 90, 90, 90]},
-        {"move": [90, 87, 90, 90, 90], "pause_ms": 2000},
-        {"move": [90, 90, 90, 90, 90], "pause_ms": 6000},
-        {"relay": "MAGNET", "state": "OFF"}, #turn on magnet
-        ]
-    elif active_tool == "pneumatic":
-        seq = [
-        {"move": [90, 90, 90, 90, 90]},
-        {"move": [90, 87, 90, 90, 90], "pause_ms": 2000},
-        {"move": [90, 90, 90, 90, 90], "pause_ms": 6000},
-        {"relay": "MAGNET", "state": "OFF"}, #turn on magnet
-        ]
-    else:
+    seq = TOOL_RETURN_SEQUENCES.get(active_tool)
+    if not seq:
         return
 
     start_action(seq, on_done=mark_tool_returned)

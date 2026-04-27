@@ -1325,16 +1325,21 @@ PNEUMATIC_RETURN_SEQ = [
 
 ACTION_A_TASK_SEQ = [
     {"move": [90, 90, 90, 90, 90], "pause_ms": 1000}, #HOME
+    {"move": [115, 90, 90, 90, 90], "pause_ms": 1000}, #HOME
+    {"move": [109, 90, 90, 90, 90], "pause_ms": 1000}, #HOME
     {"test_servo": 40, "pause_ms": 5000}, #OPEN GRIPPER
-    {"move": [105, 110, 155, 48, 83], "pause_ms": 4000}, #HOVER
-    {"move": [107, 121, 155, 48, 83], "pause_ms": 1000}, #LOWER DOWN TO TARGET
+    {"move": [109, 110, 140, 62, 90], "pause_ms": 6000}, #HOVER
+    {"move": [109, 116, 150, 62, 90], "pause_ms": 5000}, #LOWER DOWN TO TARGET
     {"test_servo": 67, "pause_ms": 5000}, #CLOSE GRIPPER
-    {"move": [107, 103, 155, 48, 83], "pause_ms": 2000}, #PICK UP FOR CLEARANCE
-    {"move": [71, 125, 136, 60, 88], "pause_ms": 4000}, #HOVER LOWER DOWN
-    {"move": [71, 128, 136, 60, 88], "pause_ms": 1000}, #LOWER DOWN
+    {"move": [109, 105, 120, 62, 90], "pause_ms": 4000}, #PICK UP FOR CLEARANCE
+    {"move": [60, 105, 120, 62, 90], "pause_ms": 6000}, #BASE CENTER
+    {"move": [75, 105, 120, 62, 90], "pause_ms": 6000}, #BASE CENTER
+    {"move": [75, 105, 145, 62, 90], "pause_ms": 4000}, #HOVER LOWER DOWN
+    {"move": [75, 110, 160, 62, 90], "pause_ms": 4000}, #LOWER DOWN
     {"test_servo": 40, "pause_ms": 6000}, #OPEN GRIPPER
-    {"move": [71, 115, 136, 60, 88], "pause_ms": 1000}, #PULL UP
+    {"move": [75, 114, 120, 52, 90], "pause_ms": 1000}, #PULL UP
     {"move": [90, 90, 90, 90, 90], "pause_ms": 1000}, #HOME
+    {"test_servo": 90, "pause_ms": 5000}, #CLOSE GRIPPER
 ]
 
 ACTION_B_TASK_SEQ = [

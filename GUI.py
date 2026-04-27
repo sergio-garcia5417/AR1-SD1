@@ -74,7 +74,7 @@ WORK_MIN = {
     "link2": 25,
     "link3": 25,
     "tool":  0,
-    "test":  35, #GRIPPER - LEFT IS OPEN
+    "test":  35,
 }
 WORK_MAX = {
     "base":  170,

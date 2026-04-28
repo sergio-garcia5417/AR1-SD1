@@ -1300,9 +1300,12 @@ PUMP_PICKUP_SEQ = [
 ]
 
 PUMP_RETURN_SEQ = [
-    {"move": [90, 90, 90, 90, 90]},
-    {"move": [90, 90, 90, 90, 90], "pause_ms": 6000},
-    {"relay": "MAGNET", "state": "OFF"},
+    {"move": [90, 90, 90, 90, 90], "pause_ms": 3000}, #START HOME
+    {"move": [90, 111, 150, 131, 88], "pause_ms": 6000}, #HOVER
+    {"move": [90, 116, 150, 131, 88], "pause_ms": 6000}, #ACQUIRE TARGET
+    {"relay": "MAGNET", "state": "OFF", "pause_ms": 3000}, #MAGNET ON
+    {"move": [90, 105, 150, 131, 88], "pause_ms": 2000}, #PULL UP
+    {"move": [90, 90, 90, 90, 90]}, #END HOME
 ]
 
 PNEUMATIC_PICKUP_SEQ = [
@@ -1343,7 +1346,16 @@ ACTION_A_TASK_SEQ = [
 ]
 
 ACTION_B_TASK_SEQ = [
-    # B STEPS
+  {"move": [90, 90, 90, 90, 90], "pause_ms": 1000}, #HOME
+  {"move": [90, 105, 150, 131, 88], "pause_ms": 5000}, #HOVER
+  {"move": [90, 116, 150, 131, 88], "pause_ms": 4000}, #LOWER TO TARGET ACTUAL
+  {"relay": "VACUUM", "state": "ON", "pause_ms": 6000}, #PUMP ON
+  {"move": [90, 105, 150, 131, 88], "pause_ms": 4000}, #PICK UP FOR CLEARANCE
+  {"move": [66, 122, 146, 47, 88], "pause_ms": 6000}, #DROP-OFF HOVER
+  {"move": [66, 127, 146, 47, 88], "pause_ms": 2000}, #TRANSLATE TO DROP-OFF
+  {"relay": "VACUUM", "state": "OFF", "pause_ms": 6000}, #PUMP OFF
+  {"move": [66, 122, 146, 47, 88], "pause_ms": 6000}, #DROP-OFF HOVER AFTER DROP-OFF
+  {"move": [90, 90, 90, 90, 90], "pause_ms": 3000}, #HOME
 ]
 
 ACTION_C_TASK_SEQ = [

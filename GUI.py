@@ -1310,23 +1310,24 @@ PUMP_RETURN_SEQ = [
 
 PNEUMATIC_PICKUP_SEQ = [
     {"move": [90, 90, 90, 90, 90], "pause_ms": 3000},
-    {"move": [15, 90, 90, 90, 89], "pause_ms": 5000},
-    {"move": [20, 90, 90, 90, 89], "pause_ms": 5000},
-    {"move": [20, 103, 137, 150, 89], "pause_ms": 5000},
-    {"move": [20, 111, 137, 150, 89], "pause_ms": 5000},
-    {"relay": "MAGNET", "state": "ON", "pause_ms": 2000},
-    {"move": [20, 95, 110, 150, 89], "pause_ms": 5000},
-    {"move": [90, 90, 90, 90, 89]},
+    {"move": [15, 90, 90, 90, 86], "pause_ms": 5000},
+    {"move": [20, 90, 90, 90, 86], "pause_ms": 5000},
+    {"move": [20, 105, 137, 150, 86], "pause_ms": 6000},
+    {"move": [20, 111, 137, 150, 86], "pause_ms": 5000},
+    {"relay": "MAGNET", "state": "ON", "pause_ms": 4000},
+    {"move": [20, 95, 110, 150, 86], "pause_ms": 5000},
+    {"move": [90, 90, 90, 90, 86]},
 ]
 
 PNEUMATIC_RETURN_SEQ = [
-   {"move": [90, 90, 90, 90, 89], "pause_ms": 3000},
-    {"move": [15, 90, 90, 90, 89], "pause_ms": 5000},
-    {"move": [20, 103, 137, 150, 89], "pause_ms": 5000},
-    {"move": [20, 111, 137, 150, 89], "pause_ms": 5000},
-    {"relay": "MAGNET", "state": "OFF", "pause_ms": 5000},
-    {"move": [20, 95, 138, 150, 89], "pause_ms": 3000},
-    {"move": [90, 90, 90, 90, 90]},
+    {"move": [90, 90, 90, 90, 86], "pause_ms": 3000},
+    {"move": [15, 90, 90, 90, 86], "pause_ms": 5000},
+    {"move": [20, 90, 90, 90, 86], "pause_ms": 5000},
+    {"move": [20, 105, 137, 150, 86], "pause_ms": 6000},
+    {"move": [20, 110, 137, 150, 86], "pause_ms": 5000},
+    {"relay": "MAGNET", "state": "OFF", "pause_ms": 4000},
+    {"move": [20, 95, 110, 150, 86], "pause_ms": 5000},
+    {"move": [90, 90, 90, 90, 86]},
 ]
 
 ACTION_A_TASK_SEQ = [

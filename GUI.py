@@ -1310,8 +1310,7 @@ PUMP_RETURN_SEQ = [
 
 PNEUMATIC_PICKUP_SEQ = [
     {"move": [90, 90, 90, 90, 90], "pause_ms": 3000},
-    {"move": [20, 90, 90, 90, 90], "pause_ms": 5000},
-    {"move": [20, 103, 138, 150, 87], "pause_ms": 10000},
+    {"move": [15, 90, 90, 90, 90], "pause_ms": 5000},
     {"move": [20, 103, 138, 150, 87], "pause_ms": 1000},
     {"move": [20, 111, 138, 150, 87], "pause_ms": 5000},
     {"relay": "MAGNET", "state": "ON", "pause_ms": 2000},
@@ -1320,10 +1319,13 @@ PNEUMATIC_PICKUP_SEQ = [
 ]
 
 PNEUMATIC_RETURN_SEQ = [
+   {"move": [90, 90, 90, 90, 90], "pause_ms": 3000},
+    {"move": [15, 90, 90, 90, 90], "pause_ms": 5000},
+    {"move": [20, 103, 138, 150, 87], "pause_ms": 5000},
+    {"move": [20, 111, 138, 150, 87], "pause_ms": 5000},
+    {"relay": "MAGNET", "state": "OFF", "pause_ms": 5000},
+    {"move": [20, 95, 138, 150, 87], "pause_ms": 2000},
     {"move": [90, 90, 90, 90, 90]},
-    {"move": [90, 87, 90, 90, 90], "pause_ms": 2000},
-    {"move": [90, 90, 90, 90, 90], "pause_ms": 6000},
-    {"relay": "MAGNET", "state": "OFF"},
 ]
 
 ACTION_A_TASK_SEQ = [

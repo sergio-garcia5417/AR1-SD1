@@ -1327,7 +1327,7 @@ PNEUMATIC_RETURN_SEQ = [
     {"move": [20, 110, 137, 150, 86], "pause_ms": 5000},
     {"relay": "MAGNET", "state": "OFF", "pause_ms": 4000},
     {"move": [20, 95, 110, 150, 86], "pause_ms": 5000},
-    {"move": [90, 90, 90, 90, 86]},
+    {"move": [90, 90, 90, 90, 90]},
 ]
 
 ACTION_A_TASK_SEQ = [

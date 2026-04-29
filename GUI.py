@@ -1353,15 +1353,15 @@ ACTION_B_TASK_SEQ = [
     {"move": [90, 90, 90, 90, 90], "pause_ms": 1000}, #HOME
     {"move": [115, 90, 90, 90, 90], "pause_ms": 5000}, #P BASE CALIBRATION
     {"move": [112, 90, 90, 90, 90], "pause_ms": 5000}, #P BASE CALIBRATION
-    {"move": [112, 126, 141, 40, 87], "pause_ms": 6000},#PUMP HOVER
-    {"move": [112, 126, 141, 49, 87], "pause_ms": 5000},#PUMP TARGET PICK UP
+    {"move": [112, 128, 147, 40, 87], "pause_ms": 7000},#PUMP HOVER
+    {"move": [112, 128, 147, 47, 87], "pause_ms": 5000},#PUMP TARGET PICK UP
     {"relay": "VACUUM", "state": "ON", "pause_ms": 5000},
     {"move": [112, 120, 130, 49, 87], "pause_ms": 5000}, #CLEAR UP
-    {"move": [60, 120, 130, 49, 87], "pause_ms": 6000}, #BASE CALIBRATION
+    {"move": [60, 120, 130, 49, 87], "pause_ms": 4000}, #BASE CALIBRATION
     {"move": [67, 120, 130, 49, 87], "pause_ms": 5000}, #BASE CALIBRATION
     {"move": [67, 120, 144, 47, 87], "pause_ms": 8000},#PUMP TARGET HOVER
-    {"move": [67, 127, 146, 47, 87], "pause_ms": 6000}, #PUMP TARGET DROP OFF
-    {"relay": "VACUUM", "state": "OFF", "pause_ms": 5000},
+    {"move": [67, 128, 147, 47, 87], "pause_ms": 6000}, #PUMP TARGET DROP OFF
+    {"relay": "VACUUM", "state": "OFF", "pause_ms": 5000}, #################################PUMP OFF DROP OFF
     {"move": [66, 100, 120, 65, 90], "pause_ms": 4000}, #PUMP TARGET DROP OFF
     {"move": [90, 90, 90, 90, 90], "pause_ms": 1000}, #HOME
 ]

@@ -66,7 +66,7 @@ FRAME_MS = 16
 MIN_MOTION_STEPS = 35
 
 #LINKS = [base_height, link1, link2, link3, wrist/tool_offset]
-LINKS = [130, 160, 180, 40, 20]
+LINKS = [70, 80, 60, 40, 20]
 DEFAULT_ANGLE = 90
 
 WORK_MIN = {

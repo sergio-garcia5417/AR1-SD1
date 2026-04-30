@@ -1374,9 +1374,9 @@ ACTION_C_TASK_SEQ = [
     {"move": [114, 116, 106, 148, 86], "pause_ms": 6000},#PNEUMATIC TARGET ACQUIRE
     {"relay": "SOLENOID", "state": "OFF", "pause_ms": 4000}, #################################PNEUMATIC GRIP
     {"move": [114, 102, 106, 148, 86], "pause_ms": 4000}, #CLEAR MOTION
-    {"move": [60, 102, 106, 148, 86], "pause_ms": 4000},#DROP OFF BASE CALIB
-    {"move": [67, 122, 103, 118, 86], "pause_ms": 7000},#DROP OFF HOVER
-    {"move": [67, 127, 103, 120, 86], "pause_ms": 6000}, #DROP OFF PNEUMATIC TARGET
+    {"move": [60, 115, 103, 118, 86], "pause_ms": 7000},#DROP OFF HOVER BASE CALIB
+    {"move": [67, 115, 103, 118, 86], "pause_ms": 7000},#DROP OFF HOVER
+    {"move": [67, 123, 105, 130, 86], "pause_ms": 6000}, #DROP OFF PNEUMATIC TARGET
     {"relay": "SOLENOID", "state": "ON", "pause_ms": 5000}, ############################PUMP OFF DROP OFF
     {"move": [67, 110, 95, 115, 86], "pause_ms": 6000}, #CLEAR DROP
     {"move": [90, 90, 90, 90, 90], "pause_ms": 2000}, #HOME

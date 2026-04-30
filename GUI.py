@@ -1367,9 +1367,10 @@ ACTION_B_TASK_SEQ = [
 
 ACTION_C_TASK_SEQ = [
     {"move": [90, 90, 90, 90, 90], "pause_ms": 2000}, #HOME
+    {"relay": "SOLENOID", "state": "ON", "pause_ms": 5000}, #################################OFF IS CLOSED / ON IS OPEN
     {"move": [120, 90, 90, 90, 90], "pause_ms": 4000}, #HOME
     {"move": [114, 116, 106, 140, 86], "pause_ms": 6000},#HOVER PNEUMATIC
-    {"relay": "SOLENOID", "state": "ON", "pause_ms": 5000}, #################################OFF IS CLOSED / ON IS OPEN
+    {"move": [114, 116, 106, 160, 86], "pause_ms": 5000},#HOVER PNEUMATIC CALIBRATION
     {"move": [114, 116, 106, 148, 86], "pause_ms": 6000},#PNEUMATIC TARGET ACQUIRE
     {"relay": "SOLENOID", "state": "OFF", "pause_ms": 4000}, #################################PNEUMATIC GRIP
     {"move": [114, 102, 106, 148, 86], "pause_ms": 4000}, #CLEAR MOTION

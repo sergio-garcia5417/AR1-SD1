@@ -1301,10 +1301,10 @@ PUMP_PICKUP_SEQ = [
 
 PUMP_RETURN_SEQ = [
     {"move": [90, 90, 90, 90, 88], "pause_ms": 3000}, #START HOME
-    {"move": [90, 111, 150, 131, 88], "pause_ms": 6000}, #HOVER
-    {"move": [90, 116, 150, 131, 88], "pause_ms": 6000}, #ACQUIRE TARGET
-    {"relay": "MAGNET", "state": "OFF", "pause_ms": 3000}, #MAGNET OFF
-    {"move": [90, 105, 150, 131, 88], "pause_ms": 5000}, #PULL UP
+    {"move": [90, 111, 150, 131, 88], "pause_ms": 3000}, #HOVER
+    {"move": [90, 116, 150, 131, 88], "pause_ms": 2000}, #ACQUIRE TARGET
+    {"relay": "MAGNET", "state": "OFF", "pause_ms": 1000}, #MAGNET OFF
+    {"move": [90, 105, 150, 131, 88], "pause_ms": 2000}, #PULL UP
     {"move": [90, 90, 90, 90, 90]}, #END HOME
 ]
 
@@ -1351,10 +1351,9 @@ ACTION_A_TASK_SEQ = [
 
 ACTION_B_TASK_SEQ = [
     {"move": [90, 90, 90, 90, 90], "pause_ms": 1000}, #HOME
-    {"move": [115, 90, 90, 90, 90], "pause_ms": 5000}, #P BASE CALIBRATION
-    {"move": [112, 90, 90, 90, 90], "pause_ms": 5000}, #P BASE CALIBRATION
-    {"move": [112, 128, 147, 40, 87], "pause_ms": 7000},#PUMP HOVER
-    {"move": [112, 128, 147, 47, 87], "pause_ms": 5000},#PUMP TARGET PICK UP
+    {"move": [105, 126, 142, 52, 88], "pause_ms": 7000},#PUMP HOVER BASE CALIB
+    {"move": [112, 126, 142, 52, 88], "pause_ms": 7000},#PUMP HOVER
+    {"move": [112, 129, 142, 52, 88], "pause_ms": 5000},#PUMP TARGET PICK UP
     {"relay": "VACUUM", "state": "ON", "pause_ms": 5000},
     {"move": [112, 120, 130, 49, 87], "pause_ms": 5000}, #CLEAR UP
     {"move": [60, 120, 130, 49, 87], "pause_ms": 4000}, #BASE CALIBRATION

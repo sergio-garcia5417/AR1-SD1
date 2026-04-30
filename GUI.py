@@ -1368,15 +1368,15 @@ ACTION_B_TASK_SEQ = [
 ACTION_C_TASK_SEQ = [
     {"move": [90, 90, 90, 90, 90], "pause_ms": 2000}, #HOME
     {"move": [120, 90, 90, 90, 90], "pause_ms": 4000}, #HOME
-    {"move": [115, 116, 106, 140, 86], "pause_ms": 6000},#HOVER PNEUMATIC
+    {"move": [114, 116, 106, 140, 86], "pause_ms": 6000},#HOVER PNEUMATIC
     {"relay": "SOLENOID", "state": "ON", "pause_ms": 5000}, #################################OFF IS CLOSED / ON IS OPEN
-    {"move": [115, 116, 106, 148, 86], "pause_ms": 6000},#PNEUMATIC TARGET ACQUIRE
+    {"move": [114, 116, 106, 148, 86], "pause_ms": 6000},#PNEUMATIC TARGET ACQUIRE
     {"relay": "SOLENOID", "state": "OFF", "pause_ms": 4000}, #################################PNEUMATIC GRIP
-    {"move": [115, 102, 106, 148, 86], "pause_ms": 4000}, #CLEAR MOTION
+    {"move": [114, 102, 106, 148, 86], "pause_ms": 4000}, #CLEAR MOTION
     {"move": [60, 102, 106, 148, 86], "pause_ms": 4000},#DROP OFF BASE CALIB
     {"move": [67, 122, 103, 118, 86], "pause_ms": 7000},#DROP OFF HOVER
-    {"move": [67, 128, 103, 116, 86], "pause_ms": 6000}, #DROP OFF PNEUMATIC TARGET
-    {"relay": "SOLENOID", "state": "ON", "pause_ms": 5000}, #################################PUMP OFF DROP OFF
+    {"move": [67, 127, 103, 120, 86], "pause_ms": 6000}, #DROP OFF PNEUMATIC TARGET
+    {"relay": "SOLENOID", "state": "ON", "pause_ms": 5000}, ############################PUMP OFF DROP OFF
     {"move": [67, 110, 95, 115, 86], "pause_ms": 6000}, #CLEAR DROP
     {"move": [90, 90, 90, 90, 90], "pause_ms": 2000}, #HOME
 ]

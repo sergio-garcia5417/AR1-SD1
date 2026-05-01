@@ -1269,44 +1269,60 @@ def servo_test_changed(_val=None):
 GRIPPER_PICKUP_SEQ = [
     {"move": [90, 90, 90, 90, 90], "pause_ms": 600},      # start home
     {"move": [152, 90, 90, 90, 90], "pause_ms": 600},     # rotate base
-    {"move": [152, 56, 120, 120, 85], "pause_ms": 2000},  # straighten
-    {"move": [152, 102, 144, 152, 80], "pause_ms": 2000}, # get to latch position
+    #{"move": [152, 56, 120, 120, 85], "pause_ms": 2000},  # straighten
+    #{"move": [152, 102, 144, 152, 80], "pause_ms": 2000}, # get to latch position
+    {"move": [152, 105, 143, 156, 80], "pause_ms": 2000}, # get to latch position
     {"relay": "MAGNET", "state": "ON"},                  # turn on magnet
-    {"move": [152, 102, 144, 152, 80], "pause_ms": 2000}, # confirm latch position
-    {"move": [152, 56, 144, 152, 80], "pause_ms": 2000},  # pull away / straighten
+    #old
+    #{"move": [152, 102, 144, 152, 80], "pause_ms": 2000}, # confirm latch position
+    #{"move": [152, 56, 144, 152, 80], "pause_ms": 2000},  # pull away / straighten
+    #new
+    {"move": [152, 105, 143, 156, 80], "pause_ms": 2000}, # confirm latch position
+    {"move": [152, 56, 143, 156, 80], "pause_ms": 2000},  # pull away / straighten
     {"move": [90, 90, 90, 90, 90], "pause_ms": 600},      # home
 ]
 
 GRIPPER_RETURN_SEQ = [
     {"move": [90, 90, 90, 90, 90]},
-    {"move": [90, 90, 125, 149, 80], "pause_ms": 3000},
-    {"move": [152, 90, 125, 149, 80], "pause_ms": 3000},
-    {"move": [152, 70, 125, 149, 80], "pause_ms": 3000},
-    {"move": [160, 70, 137, 149, 80], "pause_ms": 3000},
-    {"move": [152, 90, 137, 149, 80], "pause_ms": 5000},
-    {"move": [152, 101, 137, 149, 80], "pause_ms": 5000},
-    {"move": [152, 101, 145, 149, 80], "pause_ms": 2000},
+    #{"move": [90, 90, 125, 149, 80], "pause_ms": 3000},
+    #{"move": [152, 90, 125, 149, 80], "pause_ms": 3000},
+    #{"move": [152, 70, 125, 149, 80], "pause_ms": 3000},
+    #{"move": [160, 70, 137, 149, 80], "pause_ms": 3000},
+    #{"move": [152, 90, 137, 149, 80], "pause_ms": 5000},
+    #{"move": [152, 101, 137, 149, 80], "pause_ms": 5000},
+    #{"move": [152, 101, 145, 149, 80], "pause_ms": 2000},
+    #{"relay": "MAGNET", "state": "OFF", "pause_ms": 3000},
+    #{"move": [152, 95, 145, 149, 80], "pause_ms": 2000},
+    {"move": [90, 93, 124, 153, 80], "pause_ms": 3000},
+    {"move": [152, 93, 124, 153, 80], "pause_ms": 3000},
+    {"move": [152, 73, 124, 153, 80], "pause_ms": 3000},
+    {"move": [160, 73, 136, 153, 80], "pause_ms": 3000},
+    {"move": [152, 93, 136, 153, 80], "pause_ms": 5000},
+    {"move": [152, 104, 136, 153, 80], "pause_ms": 5000},
+    {"move": [152, 104, 144, 153, 80], "pause_ms": 2000},
     {"relay": "MAGNET", "state": "OFF", "pause_ms": 3000},
-    {"move": [152, 95, 145, 149, 80], "pause_ms": 2000},
+    {"move": [152, 98, 144, 153, 80], "pause_ms": 2000},
     {"move": [90, 90, 90, 90, 90]},
 ]
 
 PUMP_PICKUP_SEQ = [
     {"move": [90, 90, 90, 90, 90], "pause_ms": 3000}, #START HOME
-    {"move": [90, 100, 150, 131, 88], "pause_ms": 6000}, #HOVER
-    {"move": [90, 116, 150, 131, 88], "pause_ms": 4000}, #ACQUIRE TARGET
+    {"move": [90, 105, 149, 135, 88], "pause_ms": 6000}, #HOVER
+    #{"move": [90, 116, 150, 131, 88], "pause_ms": 4000}, #ACQUIRE TARGET
+    {"move": [90, 119, 149, 135, 88], "pause_ms": 4000}, #ACQUIRE TARGET
     {"relay": "MAGNET", "state": "ON", "pause_ms": 3000}, #MAGNET ON
-    {"move": [90, 105, 150, 131, 88], "pause_ms": 2000}, #PULL UP
+    {"move": [90, 105, 149, 135, 88], "pause_ms": 2000}, #PULL UP
     {"move": [90, 90, 90, 90, 88]}, #END HOME
 ]
 
 PUMP_RETURN_SEQ = [
-    {"move": [90, 90, 90, 90, 88], "pause_ms": 3000}, #START HOME
-    {"move": [90, 111, 150, 131, 88], "pause_ms": 3000}, #HOVER
-    {"move": [90, 116, 150, 131, 88], "pause_ms": 2000}, #ACQUIRE TARGET
+    {"move": [90, 90, 90, 90, 90], "pause_ms": 3000}, #START HOME
+    {"move": [90, 105, 149, 135, 88], "pause_ms": 6000}, #HOVER
+    #{"move": [90, 116, 150, 131, 88], "pause_ms": 4000}, #ACQUIRE TARGET
+    {"move": [90, 119, 149, 135, 88], "pause_ms": 4000}, #ACQUIRE TARGET
     {"relay": "MAGNET", "state": "OFF", "pause_ms": 1000}, #MAGNET OFF
-    {"move": [90, 105, 150, 131, 88], "pause_ms": 2000}, #PULL UP
-    {"move": [90, 90, 90, 90, 90]}, #END HOME
+    {"move": [90, 105, 149, 135, 88], "pause_ms": 2000}, #PULL UP
+    {"move": [90, 90, 90, 90, 88]}, #END HOME
 ]
 
 PNEUMATIC_PICKUP_SEQ = [
